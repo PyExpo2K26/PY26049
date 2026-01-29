@@ -1,0 +1,8 @@
+speechrecognition
+pyaudio
+pyttsx3
+opencv-python
+mediapipe
+flask
+pyserial
+numpy
