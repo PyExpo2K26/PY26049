@@ -8,7 +8,9 @@ In this system, voice commands and hand gestures are processed using Python, and
 STRATEGIC INTENT:
 
 a. Reduce radiation exposure to radiology technicians.
+
 b. Enable remote, hands-free control of imaging equipment.
+
 c. Improve safety and workflow efficiency in hazardous environments.
 
 LOGIC FLOW:
@@ -24,39 +26,45 @@ Interpreted commands are sent to the Arduino Uno via serial communication.
 The Arudino Uno executes the corresponding control actions using connected outputs.
 
 ACTION ITEMS
-1. HARDWARE:
 
-1 × Arudino Uno Board
+1.HARDWARE:
 
-USB Cable (USB-A to Type-B)
+a.1 × Arudino Uno Board
 
-Computer/Laptop with microphone and camera
+b.USB Cable (USB-A to Type-B)
 
-(Optional) Relay module / LEDs / actuators for demonstrating control actions
+c.Computer/Laptop with microphone and camera
 
-2. SOFTWARE:
+d.(Optional) Relay module / LEDs / actuators for demonstrating control actions
 
-Python 3.x
+2.SOFTWARE:
 
-Arduino IDE
+a.Python 3.x
 
-Python Libraries Used:
+b.Arduino IDE
 
-SpeechRecognition
+c.Python Libraries Used:
 
-OpenCV
+d.SpeechRecognition
 
-MediaPipe
+e.OpenCV
 
-NumPy
+f.MediaPipe
+
+g.NumPy
 
 EXECUTION METHODOLOGY:
 
 a. Capture voice commands using a microphone.
+
 b. Detect and track hand gestures using a camera.
+
 c. Process voice and gesture inputs in Python.
+
 d. Convert recognized commands into predefined control signals.
+
 e. Transmit commands to the Arduino Uno via serial communication.
+
 f. Execute control actions through Arduino digital/analog outputs.
 
 INTERFACE & APPLICATION AREAS:
