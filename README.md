@@ -33,9 +33,9 @@ a.1 × Arduino Uno Board
 
 b.USB Cable (USB-A to Type-B)
 
-c.Computer/Laptop with microphone and camera
+c.Computer/Laptop with microphone and camera.
 
-d.(Optional) Relay module / LEDs / actuators for demonstrating control actions
+d.(Optional) Relay module / LEDs / actuators for demonstrating control actions.
 
 2.SOFTWARE:
 
