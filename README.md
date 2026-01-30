@@ -1,4 +1,4 @@
-# Multimodal Voice & Gesture Controlled Radiology System
+# Multimodal Voice & Gesture Controlled System
 
 INTRODUCTION
 
