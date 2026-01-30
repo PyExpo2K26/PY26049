@@ -9,7 +9,7 @@ It is **not intended for direct clinical or hospital deployment**.
 
 ---
 
-## 🎯 Problem Statement
+## 🎯 PROBLEM STATEMENT
 Radiology equipment operation involves repetitive and safety-critical actions.  
 Human errors such as incorrect command sequencing, delayed emergency response, or operator distraction can lead to unsafe situations.
 
@@ -36,7 +36,7 @@ This ensures:
 
 ---
 
-## 🏗 System Architecture
+## 🏗 SYSTEM ARCHITECTURE
 Voice Input ┐
 
 ├──> Command Validator ──> State Manager ──> Arduino (LEDs)
@@ -53,7 +53,7 @@ Dashboard
 
 ---
 
-## 🧩 Module Description
+## 🧩 MODULE DESCRIPTION
 
 ### 1️⃣ Voice Control (`voice_control/`)
 
@@ -105,7 +105,7 @@ Dashboard
 
 ---
 
-## 🔌 Hardware Indicators
+## 🔌 HARDWARE INDICATORS
 
 | LED Color | Meaning |
 |---------|--------|
@@ -115,7 +115,7 @@ Dashboard
 
 ---
 
-## 🛠 Technologies Used
+## 🛠 TECHNOLOGIES USED 
 
 - Python
 
@@ -131,7 +131,7 @@ Dashboard
 
 ---
 
-## ▶️ How to Run
+## ▶️ EXECUTION FLOW
 
 ```bash
 python -m venv venv
