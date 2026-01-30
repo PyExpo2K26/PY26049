@@ -77,6 +77,6 @@ c.Operation in hazardous or high-radiation environments
 
 d.Demonstration platforms for medical automation systems
 
-CONCLUSION
+CONCLUSION:
 
 This project demonstrates a simple, cost-effective, and reliable solution for operating radiology machines using voice commands and hand gestures with an Arduino Uno microcontroller. By minimizing direct human presence in radiation-prone areas, the system significantly reduces health risks while improving operational efficiency and safety. The system can be further enhanced for real-world medical automation and smart healthcare applications.
