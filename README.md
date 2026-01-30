@@ -1,140 +1,47 @@
 # Radiology Voice & Gesture Control System
 
-## INSIGHT
-This work is a Python tool that lets you use your voice and your hands to make choices while using radiology machines. It is built to help stop people from making small or big mistakes when they use these tools.  
-This tool shows how you can use no hands, just your voice or moves, to do your work more safe and clear. This helps with hard jobs where being safe matters a lot.
-
-⚠️ **Note:** This project is a prototype developed for academic and demonstration purposes only.  
-It is **not intended for direct clinical or hospital deployment**.
-
----
-
 ## 🎯 PROBLEM STATEMENT
 Radiology equipment operation involves repetitive and safety-critical actions.  
-Human errors such as incorrect command sequencing, delayed emergency response, or operator distraction can lead to unsafe situations.
+Human errors such as incorrect command sequencing, delayed emergency response, or operator distraction can lead to unsafe situations during operation.
 
-This project focuses on:
-
-- Reducing human error through **state-based command validation**
-
-- Preventing unsafe operations by **blocking invalid commands**
-
-- Improving operator workflow using **hands-free interaction**
+Conventional control methods require constant manual interaction, which increases the chance of mistakes, especially in high-pressure environments.  
+Therefore, there is a need for a safer and more controlled interaction method that can help reduce human error.
 
 ---
 
-## 🧠 DESIGN PHILOSOPHY
-All system interactions—whether voice or gesture—are processed through a **centralized state machine**.  
-Commands are executed **only if they are valid for the current system state**.
+## 💡 PROPOSED SOLUTION
+The proposed system provides a **voice- and hand-gesture-based control interface** for radiology equipment operations.
 
-This ensures:
-- Predictable system behavior
+Key aspects of the solution:
+- Voice and gesture inputs are used as **hands-free command methods**
+- All commands pass through a **central state validation logic**
+- Commands are executed **only if they are valid for the current system state**
+- Emergency actions are given **highest priority**
+- System status is displayed using a **dashboard and hardware indicators**
 
-- Emergency actions always have priority
-
-- Accidental or unsafe commands are ignored
-
----
-
-## 🏗 SYSTEM ARCHITECTURE
-Voice Input ┐
-
-├──> Command Validator ──> State Manager ──> Arduino (LEDs)
-
-Gesture Input ┘ │
-
-Dashboard
-
-- Input modules do **not** directly control hardware 
-
-- The validator enforces safety rules  
-
-- Hardware acts only as an execution layer  
+This design helps reduce human error by preventing unsafe or illogical operations and ensuring predictable system behavior.
 
 ---
 
-## 🧩 MODULE DESCRIPTION
+## 🛠 Materials / Tools Used
 
-### 1️⃣ Voice Control (`voice_control/`)
+### Software Tools
+- Python  
+- SpeechRecognition (voice input)  
+- OpenCV (camera input)  
+- MediaPipe (hand gesture detection)  
+- Flask (dashboard)  
+- PySerial (Arduino communication)  
 
-- Uses Python `SpeechRecognition`
+### Hardware Components
+- Arduino Uno  
+- Breadboard  
+- LEDs (Green, Yellow, Red)  
+- Resistors (220Ω)  
+- USB cable  
 
-- Converts speech to predefined command keywords
-
-- Sends commands to the central validator
-
-- Voice input never directly controls hardware
-
-### 2️⃣ Gesture Control (`gesture_control/`)
-
-- Uses OpenCV and MediaPipe for hand detection
-
-- Recognizes simple hand gestures
-
-- Maps gestures to system commands
-
-- Emergency gestures have highest priority
-
-### 3️⃣ Core Logic (`core_logic/`)
-
-- Central state manager
-
-- Validates all commands
-
-- Blocks invalid or unsafe transitions
-
-- Ensures consistent system behavior
-
-### 4️⃣ Dashboard (`dashboard/`)
-
-- Built using Flask
-
-- Displays real-time system state
-
-- Provides clear visual feedback
-
-- Allows manual reset after emergency state
-
-### 5️⃣ Arduino Control (`arduino_control/`)
-
-- Represents the hardware execution layer
-
-- Receives serial commands from Python
-
-- Uses LEDs to simulate system states
+### Input Devices
+- Microphone / Headset  
+- Web Camera  
 
 ---
-
-## 🔌 HARDWARE INDICATORS
-
-| LED Color | Meaning |
-|---------|--------|
-| 🟢 Green | Scanning |
-| 🟡 Yellow | Completed / Stopped |
-| 🔴 Red | Emergency |
-
----
-
-## 🛠 TECHNOLOGIES USED 
-
-- Python
-
-- SpeechRecognition
-
-- OpenCV
-
-- MediaPipe
-
-- Flask
-
-- Arduino (Serial Communication)
-
----
-
-## ▶️ EXECUTION FLOW
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-python main.py
