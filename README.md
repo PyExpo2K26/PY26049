@@ -1,82 +1,141 @@
-# Multimodal Voice & Gesture Controlled Radiology System
+# Radiology Voice & Gesture Control System
 
-INTRODUCTION
+## Overview
+This work is a Python tool that lets you use your voice and your hands to make choices while using radiology machines. It is built to help stop people from making small or big mistakes when they use these tools.  
+This tool shows how you can use no hands, just your voice or moves, to do your work more safe and clear. This helps with hard jobs where being safe matters a lot.
 
-Radiology and medical imaging devices involve exposure to ionizing radiation, which can pose serious health risks to radiology technicians during prolonged operation. To improve safety and reduce radiation exposure, this project presents a multimodal voice-command and hand-gesture controlled system that enables technicians to operate radiology equipment remotely from outside high-radiation zones.
-In this system, voice commands and hand gestures are processed using Python, and the corresponding control signals are transmitted to an Arduino Uno microcontroller, which executes the required actions. This approach enhances safety, efficiency, and hands-free operation without direct physical interaction with the equipment.
+⚠️ **Note:** This project is a prototype developed for academic and demonstration purposes only.  
+It is **not intended for direct clinical or hospital deployment**.
 
-STRATEGIC INTENT:
+---
 
-a. Reduce radiation exposure to radiology technicians.
+## 🎯 Problem Statement
+Radiology equipment operation involves repetitive and safety-critical actions.  
 
-b. Enable remote, hands-free control of imaging equipment.
+Human errors such as incorrect command sequencing, delayed emergency response, or operator distraction can lead to unsafe situations.
 
-c. Improve safety and workflow efficiency in hazardous environments.
+This project focuses on:
+- Reducing human error through **state-based command validation**
 
-LOGIC FLOW:
+- Preventing unsafe operations by **blocking invalid commands**
 
-Voice commands are captured using a microphone.
+- Improving operator workflow using **hands-free interaction**
 
-Hand gestures are detected using a camera.
+---
 
-Audio and visual inputs are processed using Python.
+## 🧠 Core Idea
+All system interactions—whether voice or gesture—are processed through a **centralized state machine**.  
+Commands are executed **only if they are valid for the current system state**.
 
-Interpreted commands are sent to the Arduino Uno via serial communication.
+This ensures:
+- Predictable system behavior
 
-The Arduino Uno executes the corresponding control actions using connected outputs.
+- Emergency actions always have priority
 
-ACTION ITEMS
+- Accidental or unsafe commands are ignored
 
-1.HARDWARE:
+---
 
-a.1 × Arduino Uno Board
+## 🏗 System Architecture
+Voice Input ┐
 
-b.USB Cable (USB-A to Type-B)
+├──> Command Validator ──> State Manager ──> Arduino (LEDs)
 
-c.Computer/Laptop with microphone and camera.
+Gesture Input ┘ │
 
-d.(Optional) Relay module / LEDs / actuators for demonstrating control actions.
+Dashboard
 
-2.SOFTWARE:
 
-a.Python 3.x
+- Input modules do **not** directly control hardware 
 
-b.Arduino IDE
+- The validator enforces safety rules  
 
-c.Python Libraries Used:
+- Hardware acts only as an execution layer  
 
-d.Speech Recognition
+---
 
-e.OpenCV
+## 🧩 Module Description
 
-f.MediaPipe
+### 1️⃣ Voice Control (`voice_control/`)
 
-g.NumPy
+- Uses Python `SpeechRecognition`
 
-EXECUTION METHODOLOGY:
+- Converts speech to predefined command keywords
 
-a. Capture voice commands using a microphone.
+- Sends commands to the central validator
 
-b. Detect and track hand gestures using a camera.
+- Voice input never directly controls hardware
 
-c. Process voice and gesture inputs in Python.
+### 2️⃣ Gesture Control (`gesture_control/`)
 
-d. Convert recognized commands into predefined control signals.
+- Uses OpenCV and MediaPipe for hand detection
 
-e. Transmit commands to the Arduino Uno via serial communication.
+- Recognizes simple hand gestures
 
-f. Execute control actions through Arduino digital/analog outputs.
+- Maps gestures to system commands
 
-INTERFACE & APPLICATION AREAS:
+- Emergency gestures have highest priority
 
-a.Radiology and medical imaging rooms
+### 3️⃣ Core Logic (`core_logic/`)
 
-b.Hands-free and contactless equipment control
+- Central state manager
 
-c.Operation in hazardous or high-radiation environments
+- Validates all commands
 
-d.Demonstration platforms for medical automation systems
+- Blocks invalid or unsafe transitions
 
-CONCLUSION:
+- Ensures consistent system behavior
 
-This project demonstrates a simple, cost-effective, and reliable solution for operating radiology machines using voice commands and hand gestures with an Arduino Uno microcontroller. By minimizing direct human presence in radiation-prone areas, the system significantly reduces health risks while improving operational efficiency and safety. The system can be further enhanced for real-world medical automation and smart healthcare applications.
+### 4️⃣ Dashboard (`dashboard/`)
+
+- Built using Flask
+
+- Displays real-time system state
+
+- Provides clear visual feedback
+
+- Allows manual reset after emergency state
+
+### 5️⃣ Arduino Control (`arduino_control/`)
+
+- Represents the hardware execution layer
+
+- Receives serial commands from Python
+
+- Uses LEDs to simulate system states
+
+---
+
+## 🔌 Hardware Indicators
+
+| LED Color | Meaning |
+|---------|--------|
+| 🟢 Green | Scanning |
+| 🟡 Yellow | Completed / Stopped |
+| 🔴 Red | Emergency |
+
+---
+
+## 🛠 Technologies Used
+
+- Python
+
+- SpeechRecognition
+
+- OpenCV
+
+- MediaPipe
+
+- Flask
+
+- Arduino (Serial Communication)
+
+---
+
+## ▶️ How to Run
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
