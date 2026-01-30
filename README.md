@@ -1,6 +1,6 @@
 # Radiology Voice & Gesture Control System
 
-## Overview
+## INSIGHT
 This work is a Python tool that lets you use your voice and your hands to make choices while using radiology machines. It is built to help stop people from making small or big mistakes when they use these tools.  
 This tool shows how you can use no hands, just your voice or moves, to do your work more safe and clear. This helps with hard jobs where being safe matters a lot.
 
@@ -11,10 +11,10 @@ It is **not intended for direct clinical or hospital deployment**.
 
 ## 🎯 Problem Statement
 Radiology equipment operation involves repetitive and safety-critical actions.  
-
 Human errors such as incorrect command sequencing, delayed emergency response, or operator distraction can lead to unsafe situations.
 
 This project focuses on:
+
 - Reducing human error through **state-based command validation**
 
 - Preventing unsafe operations by **blocking invalid commands**
@@ -23,7 +23,7 @@ This project focuses on:
 
 ---
 
-## 🧠 Core Idea
+## 🧠 DESIGN PHILOSOPHY
 All system interactions—whether voice or gesture—are processed through a **centralized state machine**.  
 Commands are executed **only if they are valid for the current system state**.
 
@@ -44,7 +44,6 @@ Voice Input ┐
 Gesture Input ┘ │
 
 Dashboard
-
 
 - Input modules do **not** directly control hardware 
 
