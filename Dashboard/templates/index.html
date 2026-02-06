@@ -1,92 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radiology AI Command Center</title>
-    
-    
+    <title>Safety Monitoring Control Spec</title>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="/static/style.css">
+    <!-- Inline scripts for icons if needed or just SVG -->
 </head>
+
 <body>
 
-    
-    <div class="grid-bg"></div>
-
-    <div class="main-interface">
-        <header class="top-bar">
-            <div class="logo">RADIO<span class="highlight">AI</span></div>
-            <div class="system-status">SYSTEM ONLINE</div>
-        </header>
-
-        <div class="content-wrapper">
-            
-            <div class="status-card" id="statusCard">
-                <div class="scan-line"></div>
-                <div class="status-header">CURRENT STATUS</div>
-                
-                <div id="mode" class="mode-text INIT">INITIALIZING</div>
-                
-                <div class="status-details">
-                    <div id="message" class="message-text">Establish connection...</div>
+    <div class="control-grid">
+        <!-- TOP LEFT: OPERATOR VERIFICATION -->
+        <div class="panel operator-panel">
+            <div class="panel-header">
+                <span class="panel-title">OPERATOR VERIFICATION</span>
+                <div class="panel-status-indicator active"></div>
+            </div>
+            <div class="panel-content">
+                <div class="camera-feed-box">
+                    <div class="crosshair-overlay">
+                        <div class="corner tl"></div>
+                        <div class="corner tr"></div>
+                        <div class="corner bl"></div>
+                        <div class="corner br"></div>
+                        <div class="center-cross"></div>
+                    </div>
+                    <img src="/video_feed"
+                        style="width:100%; height:100%; object-fit: cover; position: absolute; top:0; left:0;"
+                        alt="Camera Feed">
                 </div>
-
-                <div class="visualizer">
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
+                <div class="status-display" id="operatorStatus">
+                    <span class="status-indicator-light red"></span>
+                    <span class="status-text text-red">ACCESS DENIED</span>
                 </div>
             </div>
+        </div>
 
-            <div class="controls">
-                <button id="resetBtn" onclick="resetSystem()" class="sci-fi-btn">
-                    <span class="icon">↺</span> RESET SYSTEM
+        <!-- CENTER: VOICE ASSISTANT -->
+        <div class="panel voice-panel">
+            <div class="panel-header">
+                <span class="panel-title">VOICE ASSISTANT</span>
+            </div>
+            <div class="panel-content flex-center">
+                <div class="voice-visualizer-container">
+                    <div class="voice-circle" id="voiceCircle">
+                        <div class="inner-pulse"></div>
+                    </div>
+                </div>
+                <div class="voice-transcript" id="voiceTranscript">
+                    > SYSTEM LISTENING...
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: SYSTEM STATUS -->
+        <div class="panel status-panel">
+            <div class="panel-header">
+                <span class="panel-title">SYSTEM STATUS</span>
+            </div>
+            <div class="panel-content flex-center column">
+                <div class="main-status-box" id="mainStatusBox">
+                    <div class="status-label">CURRENT STATE</div>
+                    <div class="status-value blinking" id="systemStateText">INITIALIZING</div>
+                </div>
+                <div class="sub-metrics">
+                    <div class="metric">
+                        <span class="label">CPU</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <span class="label">MEM</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM LEFT: VOICE RECOGNITION -->
+        <div class="panel log-panel">
+            <div class="panel-header">
+                <span class="panel-title">COMMAND INPUT</span>
+            </div>
+            <div class="panel-content flex-center column" style="justify-content: space-between; padding: 15px;">
+                <div class="voice-transcript-large" id="voiceTranscriptDisplay"
+                    style="flex: 1; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">
+                    <!-- Responses will appear here -->
+                </div>
+                <div class="command-box-container"
+                    style="width: 100%; display: flex; align-items: center; border-top: 1px solid #333; padding-top: 10px;">
+                    <span class="icon" style="font-size: 1.2rem; margin-right: 10px;">🔍</span>
+                    <input type="text" id="commandInput" placeholder="Type command or query..."
+                        style="flex: 1; background: transparent; border: none; color: white; font-family: var(--font-mono); outline: none;">
+                    <button onclick="submitCommand()"
+                        style="background: none; border: 1px solid #555; color: white; cursor: pointer; padding: 5px 10px; border-radius: 4px;">SEND</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM RIGHT: CONTROL BUTTONS -->
+        <div class="panel control-panel">
+            <div class="panel-header">
+                <span class="panel-title">MANUAL OVERRIDE</span>
+            </div>
+            <div class="panel-content grid-controls">
+                <button class="ctrl-btn start-btn" onclick="sendCommand('start')">
+                    <span class="btn-label">START</span>
+                    <div class="status-led"></div>
+                </button>
+                <button class="ctrl-btn stop-btn" onclick="sendCommand('stop')">
+                    <span class="btn-label">STOP</span>
+                    <div class="status-led"></div>
+                </button>
+                <button class="ctrl-btn reset-btn" onclick="sendCommand('reset')">
+                    <span class="btn-label">RESET</span>
+                    <div class="icon">↺</div>
+                </button>
+                <button class="ctrl-btn emergency-btn" onclick="sendCommand('emergency')">
+                    <span class="btn-label">EMERGENCY</span>
+                    <div class="striped-bg"></div>
+                </button>
+                <button class="ctrl-btn complete-btn" onclick="sendCommand('complete')"
+                    style="grid-column: span 2; border-color: var(--accent-cyan);">
+                    <span class="btn-label">COMPLETE</span>
                 </button>
             </div>
         </div>
-        
-        <footer class="footer-info">
-            <span class="info-item">VOICE: <span class="active">ACTIVE</span></span>
-            <span class="info-item">GESTURE: <span class="active">ACTIVE</span></span>
-        </footer>
     </div>
 
-<script>
-function updateDashboard() {
-    fetch("/status")
-        .then(res => res.json())
-        .then(data => {
-            const modeEl = document.getElementById("mode");
-            const msgEl = document.getElementById("message");
-            const cardEl = document.getElementById("statusCard");
+    <script>
+        // Mock Data Generation for the "Alive" feel
+        const logs = [
+            { tag: "[FACE]", msg: "Operator verified", type: "success" },
+            { tag: "[GESTURE]", msg: "Start scan command received", type: "info" },
+            { tag: "[VOICE]", msg: "Stop command rejected - Low confidence", type: "warn" },
+            { tag: "[SYSTEM]", msg: "Thermal check normal", type: "info" },
+            { tag: "[NETWORK]", msg: "Ping 12ms", type: "dim" }
+        ];
 
-            modeEl.textContent = data.mode;
-            msgEl.textContent = data.message;
-            
-            
-            modeEl.className = "mode-text " + data.mode;
-            cardEl.className = "status-card " + data.mode + "-BORDER";
-        })
-        .catch(err => console.error("Connection lost", err));
-}
+        let lastLogCount = 0; // Track how many logs we've already displayed
 
-function resetSystem() {
-    const btn = document.getElementById("resetBtn");
-    btn.classList.add("clicked");
-    setTimeout(() => btn.classList.remove("clicked"), 200);
+        function addLog(text, tag = "[SYSTEM]", type = "info") {
+            const logContainer = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry new`;
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            entry.innerHTML = `<span class="timestamp">${time}</span> <span class="tag ${type}">${tag}</span> <span class="msg">${text}</span>`;
+            logContainer.prepend(entry);
 
-    fetch("/reset", { method: "POST" })
-        .then(() => {
-            console.log("System reset");
+            // Clean up old logs
+            if (logContainer.children.length > 50) {
+                logContainer.lastElementChild.remove();
+            }
+        }
+
+        function updateLogs() {
+            fetch("/logs")
+                .then(res => res.json())
+                .then(data => {
+                    const logs = data.logs;
+
+                    // Only add new logs (compare count)
+                    if (logs.length > lastLogCount) {
+                        const newLogs = logs.slice(lastLogCount);
+
+                        newLogs.forEach(log => {
+                            const logContainer = document.getElementById('eventLog');
+                            const entry = document.createElement('div');
+                            entry.className = `log-entry`;
+                            entry.innerHTML = `<span class="timestamp">${log.timestamp}</span> <span class="tag ${log.type}">${log.tag}</span> <span class="msg">${log.message}</span>`;
+                            logContainer.prepend(entry);
+                        });
+
+                        lastLogCount = logs.length;
+
+                        // Clean up old logs
+                        const logContainer = document.getElementById('eventLog');
+                        while (logContainer.children.length > 50) {
+                            logContainer.lastElementChild.remove();
+                        }
+                    }
+                })
+                .catch(err => {
+                    // Silent fail
+                });
+        }
+
+        function sendCommand(cmd) {
+            // addLog(`Sending command: ${cmd.toUpperCase()}`, "[USER]", "warn");
+            fetch(`/${cmd}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    // addLog(`Command acknowledged: ${data.status}`, "[SYSTEM]", "success");
+                    updateDashboard(); // Immediate update
+                })
+                .catch(e => console.error(e));
+        }
+
+        function updateDashboard() {
+            fetch("/status")
+                .then(res => res.json())
+                .then(data => {
+                    const stateText = document.getElementById("systemStateText");
+                    const statusBox = document.getElementById("mainStatusBox");
+
+                    stateText.innerText = data.mode;
+
+                    // Face Detection Logic
+                    const opStatus = document.getElementById('operatorStatus');
+                    if (data.face_detected) {
+                        opStatus.innerHTML = `
+                            <span class="status-indicator-light green"></span>
+                            <span class="status-text text-green">FACE DETECTED</span>
+                        `;
+                    } else {
+                        opStatus.innerHTML = `
+                            <span class="status-indicator-light red"></span>
+                            <span class="status-text text-red" style="font-size: 0.8rem;">NO FACE - ACCESS DENIED</span>
+                        `;
+                    }
+
+                    // Simple class mapping for colors
+                    statusBox.className = "main-status-box"; // reset
+                    statusBox.classList.add(data.mode); // Add class like 'SCANNING'
+
+                    // Specific Logic for styling based on state
+                    if (data.mode === 'EMERGENCY') {
+                        document.body.classList.add('emergency-mode');
+                    } else {
+                        document.body.classList.remove('emergency-mode');
+                    }
+                })
+                .catch(err => {
+                    // console.error("Connection lost", err); 
+                    // Silent fail to avoid spamming console in this demo
+                });
+        }
+
+        function submitCommand() {
+            const input = document.getElementById('commandInput');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+
+            // addLog(`Query: ${cmd}`, "[USER]", "system");
+
+            fetch("/execute_command", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ command: cmd })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    // addLog(`Reply: ${data.response}`, "[BOT]", "info");
+                    // Show response in display for a moment
+                    document.getElementById('voiceTranscriptDisplay').innerText = `🤖 ${data.response}`;
+                    input.value = "";
+                    updateDashboard();
+                });
+        }
+
+        document.getElementById('commandInput').addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                submitCommand();
+            }
         });
-}
 
-setInterval(updateDashboard, 500); 
-</script>
+        // Update voice transcript - DISABLED to clean UI
+        function updateTranscript() {
+            // fetch("/transcript")
+            //     .then(res => res.json())
+            //     .then(data => {
+            //         const transcriptDisplay = document.getElementById('voiceTranscriptDisplay');
+            //         transcriptDisplay.innerText = data.transcript;
+            //     })
+            //     .catch(err => {
+            //         // Silent fail
+            //     });
+        }
 
+        // Update transcript and dashboard periodically
+        // setInterval(updateTranscript, 200); // Fast polling for real-time voice
+        setInterval(updateDashboard, 1000);
+
+        // Mock Operator Status Logic
+        // Face status is updated in updateDashboard request now
+        // Mock Operator Status Logic REMOVED
+
+        // Initial log
+        addLog("Dashboard initialized", "[SYSTEM]", "system");
+    </script>
 </body>
+
 </html>
