@@ -1,47 +1,76 @@
-# Radiology Voice & Gesture Control System
+# Safety Monitoring & Control System
 
-## 🎯 PROBLEM STATEMENT
-Radiology equipment operation involves repetitive and safety-critical actions.  
-Human errors such as incorrect command sequencing, delayed emergency response, or operator distraction can lead to unsafe situations during operation.
+A next-generation industrial control interface that combines **Computer Vision**, **Voice Recognition**, and a **Web Dashboard** into a unified safety system.
 
-Conventional control methods require constant manual interaction, which increases the chance of mistakes, especially in high-pressure environments.  
-Therefore, there is a need for a safer and more controlled interaction method that can help reduce human error.
+![Dashboard Preview](dashboard_preview.png)
+*(Note: Run the system to see the live dashboard)*
 
----
+## 🚀 Features
 
-## 💡 PROPOSED SOLUTION
-The proposed system provides a **voice- and hand-gesture-based control interface** for radiology equipment operations.
+- **Multi-Modal Control**:
+  - **Gesture**: Control the system using hand signs (Open Hand to Start, Fist to Stop).
+  - **Voice**: Speak commands like "Start Scan", "Emergency", or ask "Status".
+  - **Web**: Manual buttons and text command input via a modern dashboard.
+- **Face Verification**: System operations are locked if an authorized operator (detected face) is not present.
+- **Real-Time Dashboard**: Monochromatic "Sci-Fi" style UI showing live camera feed, system logs, and hardware status.
+- **Emergency Protocols**: Dedicated gesture/voice commands to trigger an immediate system halt.
 
-Key aspects of the solution:
-- Voice and gesture inputs are used as **hands-free command methods**
-- All commands pass through a **central state validation logic**
-- Commands are executed **only if they are valid for the current system state**
-- Emergency actions are given **highest priority**
-- System status is displayed using a **dashboard and hardware indicators**
+## 🛠️ Installation
 
-This design helps reduce human error by preventing unsafe or illogical operations and ensuring predictable system behavior.
+1. **Prerequisites**:
+   - Python 3.9+
+   - A Webcam
+   - A Microphone
+   - (Optional) Arduino connected via USB for hardware control.
 
----
+2. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *Key libraries: `flask`, `opencv-python`, `mediapipe`, `speechrecognition`, `pyaudio`.*
 
-## 🛠 Materials / Tools Used
+## ▶️ How to Run
 
-### Software Tools
-- Python  
-- SpeechRecognition (voice input)  
-- OpenCV (camera input)  
-- MediaPipe (hand gesture detection)  
-- Flask (dashboard)  
-- PySerial (Arduino communication)  
+1. **Start the Application**:
+   ```bash
+   python main.py
+   ```
+2. **Access the Dashboard**:
+   - Open your browser and navigate to: `http://127.0.0.1:5000`
 
-### Hardware Components
-- Arduino Uno  
-- Breadboard  
-- LEDs (Green, Yellow, Red)  
-- Resistors (220Ω)  
-- USB cable  
+## 🎮 Controls
 
-### Input Devices
-- Microphone / Headset  
-- Web Camera  
+### 1. Gesture Control
+Ensure you are visible to the camera.
+- **Start Scan**: ✋ Open Hand (All fingers extended)
+- **Stop**: ✊ Fist (Closed hand)
+- **Complete Task**: ✌️ Peace Sign
+- **Emergency Stop**: 👍 Thumbs Up
 
----
+### 2. Voice Commands
+The system listens continuously. Speak clearly.
+- **"Start Scan"**
+- **"Stop Scan"**
+- **"Emergency"** / **"Emergency Stop"**
+- **"Reset"**
+- **"Status"** / **"Report"** (To get current state)
+- **"Why is it stopped?"** (Context-aware query)
+
+### 3. Dashboard (Manual Override)
+- **Buttons**: Click START, STOP, RESET, EMERGENCY, or COMPLETE on the right panel.
+- **Command Input**: Type commands (e.g., "start", "why stuck") in the bottom-left text box and press Enter.
+
+## ⚠️ Troubleshooting
+
+**"Access Denied - No Face"**
+- The system requires a face to be detected in the camera frame to operate. Stand in front of the camera.
+
+**"Manual Buttons check logs"**
+- If buttons don't work, check the Python console for `DEBUG` messages. Ensure no JavaScript blockers are running.
+
+**"Arduino Connection Failed"**
+- The system will automatically switch to **Dummy Mode** if no Arduino is found on `COM7`. This is normal for testing without hardware.
+
+## 📂 Project Structure
+
+Please refer to [ARCHITECTURE.md](ARCHITECTURE.md) for a detailed breakdown of the internal logic and data flow.
