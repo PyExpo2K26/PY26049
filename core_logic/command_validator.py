@@ -1,4 +1,3 @@
-
 from core_logic.state_manager import (
     INIT,
     IDLE,
@@ -6,6 +5,7 @@ from core_logic.state_manager import (
     SCANNING,
     COMPLETED,
     STOPPING,
+    STOPPED,
     EMERGENCY
 )
 
@@ -51,17 +51,18 @@ def validate_and_process(command, current_state):
         }
 
     if command == RESET:
-        if current_state == "EMERGENCY":
-            return {
-                "next_state": "IDLE",
+        # Allow reset from EMERGENCY, COMPLETED, STOPPED, or anything not actively SCANNING/INITIALIZING
+        if current_state in [EMERGENCY, COMPLETED, STOPPED, IDLE, STOPPING]:
+             return {
+                "next_state": IDLE,
                 "arduino_command": "RESET",
-                "message": "System reset from emergency"
+                "message": "System reset to IDLE"
             }
         else:
             return {
                 "next_state": current_state,
                 "arduino_command": None,
-                "message": "Reset not allowed"
+                "message": "Reset not allowed during active scan"
             }
 
     if command == RESET_SYSTEM:
@@ -86,7 +87,8 @@ def validate_and_process(command, current_state):
         }
 
  
-    if command == START_SCAN and current_state == IDLE:
+    # Allow START from IDLE, STOPPED, COMPLETED, or STOPPING (restart)
+    if command == START_SCAN and current_state in [IDLE, STOPPED, COMPLETED, STOPPING]:
         return {
             "next_state": INITIALIZING,
             "arduino_command": "INITIALIZE_SYSTEM",
@@ -108,7 +110,8 @@ def validate_and_process(command, current_state):
             "message": "Scan completed successfully"
         }
 
-    if command == STOP_SCAN and current_state == SCANNING:
+    # Allow STOP from SCANNING or INITIALIZING or STARTING
+    if command == STOP_SCAN and current_state in [SCANNING, INITIALIZING]:
         return {
             "next_state": STOPPING,
             "arduino_command": "STOP_SCAN",
