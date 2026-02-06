@@ -1,5 +1,5 @@
-
 from core_logic.command_validator import RESET
+from core_logic.camera_shared import camera_shared_instance
 import cv2
 import mediapipe as mp
 import threading
@@ -19,6 +19,10 @@ hands = mp_hands.Hands(
     max_num_hands=1,
     min_detection_confidence=0.7,
     min_tracking_confidence=0.7
+)
+mp_face_detection = mp.solutions.face_detection
+face_detection = mp_face_detection.FaceDetection(
+    min_detection_confidence=0.5
 )
 mp_draw = mp.solutions.drawing_utils
 
@@ -103,12 +107,24 @@ def start_gesture_control(state_manager, arduino):
 
             frame = cv2.flip(frame, 1)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # --- Face Detection ---
+            face_results = face_detection.process(rgb)
+            is_face_detected = False
+            
+            if face_results.detections:
+                is_face_detected = True
+                # for detection in face_results.detections:
+                #     mp_draw.draw_detection(frame, detection)
+            
+            state_manager.set_face_detected(is_face_detected)
+
             result = hands.process(rgb)
 
             command = None
             current_gesture_name = "NONE"
 
-            if result.multi_hand_landmarks:
+            if is_face_detected and result.multi_hand_landmarks:
                 hand = result.multi_hand_landmarks[0]
                 mp_draw.draw_landmarks(
                     frame, hand, mp_hands.HAND_CONNECTIONS
@@ -171,6 +187,19 @@ def start_gesture_control(state_manager, arduino):
                 2
             )
             
+            # Display Face Status
+            face_status_color = (0, 255, 0) if state_manager.is_face_detected() else (0, 0, 255)
+            face_status_text = "FACE DETECTED" if state_manager.is_face_detected() else "NO FACE"
+            cv2.putText(
+                frame,
+                f"FACE: {face_status_text}",
+                (20, 120),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                face_status_color,
+                2
+            )
+            
         
             color = (0, 255, 255) if command else (200, 200, 200)
             cv2.putText(
@@ -184,6 +213,7 @@ def start_gesture_control(state_manager, arduino):
             )
 
 
+            camera_shared_instance.update_frame(frame)
             cv2.imshow("Gesture Control", frame)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
