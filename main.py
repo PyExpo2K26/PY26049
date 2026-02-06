@@ -1,8 +1,7 @@
-
 import time
 
 from core_logic.state_manager import state_manager_instance
-from dashboard.app import start_dashboard
+from dashboard.app import start_dashboard, set_arduino
 from Voice_control.voice_recognition import start_voice_control
 from gesture_control.hand_detection import start_gesture_control
 from arduino_control.serial_comm import ArduinoController
@@ -14,6 +13,7 @@ def main():
     print("🚀 System starting...")
 
     state_manager_instance.set_state("IDLE")
+    set_arduino(arduino)
 
     import threading
     threading.Thread(
