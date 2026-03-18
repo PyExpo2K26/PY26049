@@ -18,7 +18,7 @@ This project uses a lightweight Python Flask backend to proxy video streams and 
 ## 📂 Architecture Overview
 
 ```text
-robot-dashboard/
+code/
 ├── app.py                  # Core Flask server mapping routes and proxying ESP32 endpoints
 ├── esp32/                  # Firmware for the ESP32 controller
 │   └── esp32cam_stream_motor.ino
