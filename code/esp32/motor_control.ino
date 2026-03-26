@@ -27,8 +27,8 @@
 #include <BlynkSimpleEsp32.h>
 
 // ── WiFi credentials ─────────────────────────────────────────
-const char* ssid     = "ESP_TEST";      // Replace
-const char* password = "12345678";  // Replace
+const char* ssid     = "Nothing 2a";      // Replace
+const char* password = "1234567891";  // Replace
 
 // ── Motor GPIO pins ───────────────────────────────────────────
 #define IN1 26
