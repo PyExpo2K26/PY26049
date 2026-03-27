@@ -41,7 +41,7 @@
         <div class="frame-corner br"></div>
         <img
           id="camera-feed"
-          src="/camera/stream"
+          src=""
           alt="Live Camera Feed"
           onerror="handleFeedError(this)"
         />
@@ -64,26 +64,26 @@
       <!-- D-Pad -->
       <div class="control-pad">
 
-        <button class="btn btn-forward"  id="btn-forward"  data-route="/forward" aria-label="Forward">
+        <button class="btn btn-forward"  id="btn-forward"  data-action="forward" aria-label="Forward">
           <span class="btn-icon">▲</span>
           <span class="btn-label">FORWARD</span>
         </button>
 
         <div class="btn-row-middle">
-          <button class="btn btn-side" id="btn-left"  data-route="/left"  aria-label="Left">
+          <button class="btn btn-side" id="btn-left"  data-action="left"  aria-label="Left">
             <span class="btn-icon">◀</span>
             <span class="btn-label">LEFT</span>
           </button>
 
           <div class="center-dot"><div class="center-ring"></div></div>
 
-          <button class="btn btn-side" id="btn-right" data-route="/right" aria-label="Right">
+          <button class="btn btn-side" id="btn-right" data-action="right" aria-label="Right">
             <span class="btn-icon">▶</span>
             <span class="btn-label">RIGHT</span>
           </button>
         </div>
 
-        <button class="btn btn-backward" id="btn-backward" data-route="/backward" aria-label="Backward">
+        <button class="btn btn-backward" id="btn-backward" data-action="backward" aria-label="Backward">
           <span class="btn-icon">▼</span>
           <span class="btn-label">BACKWARD</span>
         </button>
@@ -91,7 +91,7 @@
       </div>
 
       <!-- Stop button -->
-      <button class="btn btn-stop" id="btn-stop" data-route="/stop" aria-label="Stop">
+      <button class="btn btn-stop" id="btn-stop" data-action="stop" aria-label="Stop">
         ■ EMERGENCY STOP
       </button>
 
@@ -111,82 +111,81 @@
 
   <!-- ── Footer ─────────────────────────────────────────── -->
   <footer class="footer">
-    SYNCHROFORGE &nbsp;|&nbsp; MAGCRAWLER v2.0 &nbsp;|&nbsp; ESP32-CAM DIRECT HTTP &nbsp;|&nbsp; 2026
+    SYNCHROFORGE &nbsp;|&nbsp; MAGCRAWLER v2.0 &nbsp;|&nbsp; ESP32-CAM DIRECT &nbsp;|&nbsp; 2026
   </footer>
 
   <script>
-    // ── Camera feed ──────────────────────────────────────
+    // ── ESP32 IP — browser talks directly to ESP32 ────────
+    let ESP32_IP = "{{ esp32_ip }}";
+
+    function esp32Url(path)   { return `http://${ESP32_IP}${path}`; }
+    function streamUrl()      { return `http://${ESP32_IP}:82/stream`; }
+
+    // ── Camera feed (direct to ESP32 port 82) ─────────────
     const feedImg    = document.getElementById('camera-feed');
     const feedStatus = document.getElementById('feed-status');
 
-    feedImg.addEventListener('load', () => { feedStatus.textContent = 'LIVE'; feedImg.style.opacity = '1'; });
+    function loadStream() {
+      feedImg.src = streamUrl() + '?t=' + Date.now();
+    }
+
+    feedImg.addEventListener('load', () => {
+      feedStatus.textContent = 'LIVE';
+      feedImg.style.opacity  = '1';
+    });
+
     function handleFeedError(img) {
       feedStatus.textContent = 'NO SIGNAL';
       img.style.opacity = '0.2';
-      setTimeout(() => { img.src = '/camera/stream?t=' + Date.now(); }, 5000);
+      setTimeout(loadStream, 5000);
     }
 
-    // ── ESP32 IP updater ─────────────────────────────────
-    const ipInput = document.getElementById('esp32-ip-input');
-    const ipBtn   = document.getElementById('esp32-ip-btn');
-    if (ipBtn && ipInput) {
-      ipBtn.addEventListener('click', async () => {
-        const ip = ipInput.value.trim();
-        if (!ip) return;
-        try {
-          const res  = await fetch('/config', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ip}) });
-          const data = await res.json();
-          cmdLog(`ESP32 IP → ${data.esp32_ip}`);
-          feedImg.src = '';
-          feedImg.src = '/camera/stream?t=' + Date.now();
-        } catch(e) { cmdLog('IP update error'); }
-      });
-    }
+    // Start stream on page load
+    loadStream();
 
-    // ── Command log ──────────────────────────────────────
+    // ── Command log ───────────────────────────────────────
     const log = document.getElementById('cmd-log');
     function cmdLog(msg) {
       const line = document.createElement('span');
-      line.className = 'cmd-line';
+      line.className   = 'cmd-line';
       line.textContent = `> ${msg.toUpperCase()}`;
       log.appendChild(line);
       while (log.children.length > 5) log.removeChild(log.firstChild);
       log.scrollTop = log.scrollHeight;
     }
 
-    // ── Send command to Flask route ──────────────────────
-    async function sendCmd(route, label) {
+    // ── Send motor command directly to ESP32 port 80 ──────
+    async function sendCmd(action, label) {
       try {
-        const res  = await fetch(route);
+        const res  = await fetch(esp32Url(`/${action}`), { mode: 'cors' });
         const data = await res.json();
-        cmdLog(`${label} → ${data.ok ? 'OK' : 'FAIL'}`);
+        cmdLog(`${label} → OK`);
       } catch (e) {
         cmdLog(`${label} → ERROR`);
       }
     }
 
-    // ── Button click handlers ────────────────────────────
-    document.querySelectorAll('.btn[data-route]').forEach(btn => {
-      btn.addEventListener('mousedown', () => btn.classList.add('active'));
-      btn.addEventListener('mouseup',   () => btn.classList.remove('active'));
-      btn.addEventListener('mouseleave',() => btn.classList.remove('active'));
-      btn.addEventListener('click', () => {
-        const route = btn.dataset.route;
-        const label = btn.getAttribute('aria-label') || route.replace('/', '');
-        sendCmd(route, label);
-      });
+    // ── Button handlers ───────────────────────────────────
+    document.querySelectorAll('.btn[data-action]').forEach(btn => {
+      btn.addEventListener('mousedown',  () => btn.classList.add('active'));
+      btn.addEventListener('mouseup',    () => btn.classList.remove('active'));
+      btn.addEventListener('mouseleave', () => btn.classList.remove('active'));
+      // Touch support for mobile
+      btn.addEventListener('touchstart', (e) => { e.preventDefault(); btn.classList.add('active'); sendCmd(btn.dataset.action, btn.getAttribute('aria-label')); }, { passive: false });
+      btn.addEventListener('touchend',   (e) => { e.preventDefault(); btn.classList.remove('active'); sendCmd('stop', 'Stop'); }, { passive: false });
+      btn.addEventListener('click', () => sendCmd(btn.dataset.action, btn.getAttribute('aria-label')));
     });
 
-    // ── Keyboard controls ────────────────────────────────
+    // ── Keyboard controls ─────────────────────────────────
     const keyMap = {
-      ArrowUp:    { id: 'btn-forward',  route: '/forward',  label: 'Forward'  },
-      ArrowDown:  { id: 'btn-backward', route: '/backward', label: 'Backward' },
-      ArrowLeft:  { id: 'btn-left',     route: '/left',     label: 'Left'     },
-      ArrowRight: { id: 'btn-right',    route: '/right',    label: 'Right'    },
-      w: { id: 'btn-forward',  route: '/forward',  label: 'Forward'  },
-      s: { id: 'btn-backward', route: '/backward', label: 'Backward' },
-      a: { id: 'btn-left',     route: '/left',     label: 'Left'     },
-      d: { id: 'btn-right',    route: '/right',    label: 'Right'    },
+      ArrowUp:    { id: 'btn-forward',  action: 'forward',  label: 'Forward'  },
+      ArrowDown:  { id: 'btn-backward', action: 'backward', label: 'Backward' },
+      ArrowLeft:  { id: 'btn-left',     action: 'left',     label: 'Left'     },
+      ArrowRight: { id: 'btn-right',    action: 'right',    label: 'Right'    },
+      w: { id: 'btn-forward',  action: 'forward',  label: 'Forward'  },
+      s: { id: 'btn-backward', action: 'backward', label: 'Backward' },
+      a: { id: 'btn-left',     action: 'left',     label: 'Left'     },
+      d: { id: 'btn-right',    action: 'right',    label: 'Right'    },
     };
 
     const pressed = new Set();
@@ -195,14 +194,25 @@
       if (!m || pressed.has(e.key)) return;
       pressed.add(e.key);
       document.getElementById(m.id)?.classList.add('active');
-      sendCmd(m.route, m.label);
+      sendCmd(m.action, m.label);
     });
     document.addEventListener('keyup', (e) => {
       const m = keyMap[e.key];
       if (!m) return;
       pressed.delete(e.key);
       document.getElementById(m.id)?.classList.remove('active');
-      sendCmd('/stop', 'Stop');
+      sendCmd('stop', 'Stop');
+    });
+
+    // ── SET IP button ─────────────────────────────────────
+    document.getElementById('esp32-ip-btn').addEventListener('click', () => {
+      const ip = document.getElementById('esp32-ip-input').value.trim();
+      if (!ip) return;
+      ESP32_IP = ip;
+      cmdLog(`ESP32 IP → ${ip}`);
+      loadStream();
+      // Also update Flask so admin page stays in sync
+      fetch('/config', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ip}) });
     });
   </script>
 

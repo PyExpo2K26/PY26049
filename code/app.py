@@ -4,25 +4,25 @@ import time
 
 app = Flask(__name__)
 
-# ── ESP32-CAM Configuration ──────────────────────────────────────────────────
-ESP32_IP   = "10.209.224.100"         # Static IP set in the sketch
-ESP32_BASE = f"http://{ESP32_IP}"     # Port 80 — camera stream
-ESP32_CTRL = f"http://{ESP32_IP}:81"  # Port 81 — motor control
-START_TIME = time.time()
+# ── ESP32-CAM Configuration ───────────────────────────────────────────────────
+ESP32_IP     = "10.209.224.100"            # Static IP set in the sketch
+ESP32_CTRL   = f"http://{ESP32_IP}"        # Port 80  — motor control
+ESP32_STREAM = f"http://{ESP32_IP}:82"     # Port 82  — MJPEG stream
+START_TIME   = time.time()
 
 
-def esp32_get(path: str):
-    """Send a GET request to the ESP32 control server (port 81)."""
+def esp32_get(path: str, timeout=3):
+    """Send a GET request to the ESP32 control server (port 80)."""
     try:
-        url = f"{ESP32_CTRL}{path}"
-        resp = requests.get(url, timeout=3)
-        return resp.status_code == 200, resp.json() if resp.content else {}
+        url  = f"{ESP32_CTRL}{path}"
+        resp = requests.get(url, timeout=timeout)
+        return resp.status_code == 200, (resp.json() if resp.content else {})
     except requests.RequestException as e:
         print(f"[ESP32] Error on {path}: {e}")
         return False, {"error": str(e)}
 
 
-# ── Page Routes ──────────────────────────────────────────────────────────────
+# ── Page Routes ───────────────────────────────────────────────────────────────
 @app.route("/")
 def landing():
     return render_template("landing.html")
@@ -36,12 +36,12 @@ def admin():
     return render_template("admin.html", esp32_ip=ESP32_IP)
 
 
-# ── Camera proxy — port 80 ───────────────────────────────────────────────────
+# ── Camera proxy — port 82 ────────────────────────────────────────────────────
 @app.route("/camera/stream")
 def camera_stream():
     def generate():
         try:
-            with requests.get(f"{ESP32_BASE}/stream", stream=True, timeout=10) as r:
+            with requests.get(f"{ESP32_STREAM}/stream", stream=True, timeout=10) as r:
                 for chunk in r.iter_content(chunk_size=4096):
                     yield chunk
         except Exception as e:
@@ -49,19 +49,19 @@ def camera_stream():
             yield b""
     return Response(
         generate(),
-        content_type="multipart/x-mixed-replace; boundary=123456789000000000000987654321"
+        content_type="multipart/x-mixed-replace; boundary=mjpegframe"
     )
 
 @app.route("/camera/capture")
 def camera_capture():
     try:
-        resp = requests.get(f"{ESP32_BASE}/capture", timeout=5)
+        resp = requests.get(f"{ESP32_CTRL}/capture", timeout=5)
         return Response(resp.content, content_type="image/jpeg")
     except Exception as e:
         return jsonify({"error": str(e)}), 503
 
 
-# ── Control Routes — port 81 ─────────────────────────────────────────────────
+# ── Motor Control Routes — port 80 ────────────────────────────────────────────
 @app.route("/control/<action>")
 def control(action: str):
     valid = {"forward", "backward", "left", "right", "stop"}
@@ -101,34 +101,34 @@ def admin_status():
     hours, rem = divmod(uptime_sec, 3600)
     minutes, seconds = divmod(rem, 60)
     try:
-        r = requests.head(f"{ESP32_BASE}/stream", timeout=2)
+        r = requests.head(f"{ESP32_STREAM}/stream", timeout=2)
         cam_ok = r.status_code < 400
     except Exception:
         cam_ok = False
     return jsonify({
-        "esp32_ip": ESP32_IP,
+        "esp32_ip":      ESP32_IP,
         "esp32_reachable": ok,
-        "camera_ok": cam_ok,
-        "uptime": f"{hours:02d}:{minutes:02d}:{seconds:02d}",
-        "flask": "ok"
+        "camera_ok":     cam_ok,
+        "uptime":        f"{hours:02d}:{minutes:02d}:{seconds:02d}",
+        "flask":         "ok"
     })
 
 
 # ── Config (update ESP32 IP at runtime) ──────────────────────────────────────
 @app.route("/config", methods=["POST"])
 def set_config():
-    global ESP32_IP, ESP32_BASE, ESP32_CTRL
+    global ESP32_IP, ESP32_CTRL, ESP32_STREAM
     data = request.get_json(force=True)
     if "ip" in data:
-        ESP32_IP   = data["ip"].strip()
-        ESP32_BASE = f"http://{ESP32_IP}"
-        ESP32_CTRL = f"http://{ESP32_IP}:81"
+        ESP32_IP     = data["ip"].strip()
+        ESP32_CTRL   = f"http://{ESP32_IP}"
+        ESP32_STREAM = f"http://{ESP32_IP}:82"
         print(f"[Config] ESP32 IP updated → {ESP32_IP}")
     return jsonify({"esp32_ip": ESP32_IP})
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    print(f"[Config] ESP32-CAM stream  → http://{ESP32_IP}/stream")
-    print(f"[Config] ESP32-CAM control → http://{ESP32_IP}:81/forward")
+    print(f"[Config] ESP32-CAM control → {ESP32_CTRL}/forward")
+    print(f"[Config] ESP32-CAM stream  → {ESP32_STREAM}/stream")
     app.run(debug=True, host="0.0.0.0", port=5000)
