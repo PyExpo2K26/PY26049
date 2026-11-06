@@ -1,4 +1,4 @@
-# SynchroForge – Robotic Control System
+TECH VERSE – Robotic Control System
 
 Welcome to the **SynchroForge Robotic Control System**, a custom-built web interface designed to pilot a magnetic crawler robot via an ESP32-CAM module.
 
